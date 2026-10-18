@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071b18">
+<title>ECO.AI — Tu agenda por voz</title>
+<style>
+:root{--bg:#071b18;--panel:#102723;--panel2:#15342e;--mint:#7cf2c3;--text:#f1fff9;--muted:#a8c7bc;--line:#285046;--danger:#ff9e9e}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#17463a 0,transparent 36%),var(--bg);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:720px;margin:auto;padding:22px 16px 48px}.brand{display:flex;align-items:center;gap:12px;margin:8px 0 24px}.logo{width:48px;height:48px;border-radius:16px;background:var(--mint);color:#05251c;display:grid;place-items:center;font-weight:900;font-size:21px}.brand h1{font-size:25px;letter-spacing:1.8px;margin:0}.brand p{margin:2px 0;color:var(--muted);font-size:13px}
+.hero,.panel,.item{background:rgba(16,39,35,.94);border:1px solid var(--line);border-radius:22px;padding:18px;margin:14px 0}.hero{text-align:center;padding:24px 18px}.hero h2{font-size:23px;margin:0 0 8px}.hero p{color:var(--muted);line-height:1.5;margin:0 auto 18px;max-width:440px}.mic{border:0;width:86px;height:86px;border-radius:50%;background:var(--mint);color:#05251c;font-size:31px;box-shadow:0 0 0 9px #7cf2c31c;cursor:pointer}.mic.listening{background:#ff9e9e;box-shadow:0 0 0 10px #ff9e9e26;animation:pulse 1.4s infinite}@keyframes pulse{50%{transform:scale(1.04)}}.status{font-size:13px;color:var(--muted);margin-top:14px;min-height:20px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}input,textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#081e1a;color:var(--text);padding:13px;font:inherit;outline:none}textarea{min-height:110px;resize:vertical}input:focus,textarea:focus{border-color:var(--mint)}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:130px}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:12px 15px;font-weight:650;font-size:14px;cursor:pointer}.btn.primary{background:var(--mint);color:#05251c;border-color:var(--mint)}.btn.danger{color:var(--danger)}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px}.section-title h3{margin:0;font-size:18px}.section-title small{color:var(--muted)}.item{padding:15px;margin:10px 0}.item h4{margin:0 0 6px;font-size:16px}.item p{white-space:pre-wrap;color:#d9eee6;margin:0 0 10px;line-height:1.45}.meta{font-size:12px;color:var(--muted);margin-bottom:10px}.empty{color:var(--muted);text-align:center;padding:22px 8px}.tip{font-size:12px;color:var(--muted);line-height:1.5}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11px;color:var(--mint);margin-bottom:8px}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <header class="brand"><div class="logo">E</div><div><h1>ECO.AI</h1><p>Tu voz. Tus ideas. Tu día organizado.</p></div></header>
+  <section class="hero">
+    <span class="pill">PRIMERA VERSIÓN · BETA</span>
+    <h2>Hablá. ECO escribe.</h2>
+    <p>Tocá el micrófono y dictá una nota. Después podés guardarla o convertirla en un recordatorio.</p>
+    <button id="mic" class="mic" aria-label="Empezar dictado">🎙️</button>
+    <div id="status" class="status">Listo para escucharte. Permití el micrófono cuando el navegador lo pida.</div>
+  </section>
+  <section class="panel">
+    <h3 style="margin:0 0 8px">Crear una nota</h3>
+    <label for="title">Título (opcional)</label><input id="title" placeholder="Ej.: Ideas para mañana">
+    <label for="content">Lo que querés recordar</label><textarea id="content" placeholder="Podés escribir acá o tocar el micrófono para dictar…"></textarea>
+    <div class="row">
+      <button class="btn primary" id="saveNote">Guardar nota</button>
+      <button class="btn" id="clearForm">Limpiar</button>
+    </div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+    <h3 style="margin:0 0 8px">Agregar recordatorio</h3>
+    <p class="tip">Escribí el evento y elegí fecha y hora. La versión de prueba puede avisarte mientras la página esté abierta; el navegador no garantiza alarmas cuando está cerrada.</p>
+    <label for="remTitle">¿Qué tenés que hacer?</label><input id="remTitle" placeholder="Ej.: Turno con el médico">
+    <div class="row">
+      <div><label for="remDate">Fecha</label><input id="remDate" type="date"></div>
+      <div><label for="remTime">Hora</label><input id="remTime" type="time" value="09:00"></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="saveReminder">Crear recordatorio</button>
+      <button class="btn" id="enableNotify">Activar notificaciones</button>
+    </div>
+    <div id="notifyStatus" class="tip" style="margin-top:9px"></div>
+  </section>
+  <section class="panel">
+    <div class="section-title"><h3>Mis recordatorios</h3><small id="remCount">0</small></div>
+    <div id="reminders" class="empty">Todavía no tenés recordatorios.</div>
+  </section>
+  <section class="panel">
+    <div class="section-title"><h3>Mis notas</h3><small id="noteCount">0</small></div>
+    <div id="notes" class="empty">Tus notas guardadas aparecerán acá.</div>
+  </section>
+  <p class="tip">Privacidad de esta demo: las notas se guardan en el almacenamiento de este navegador, en este dispositivo. Si borrás los datos del navegador, podés perderlas. Todavía no hay cuenta, sincronización en la nube ni IA que interprete automáticamente las fechas.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const read=(key,fallback=[])=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
+let notes=read('eco_notes'), reminders=read('eco_reminders'), recognition=null, listening=false;
+const save=()=>{localStorage.setItem('eco_notes',JSON.stringify(notes));localStorage.setItem('eco_reminders',JSON.stringify(reminders));render()};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ $('noteCount').textContent=notes.length;
+ $('notes').className=notes.length?'':'empty';
+ $('notes').innerHTML=notes.length?notes.slice().reverse().map(n=>`<article class="item"><h4>${esc(n.title||'Nota sin título')}</h4><p>${esc(n.content)}</p><div class="meta">${new Date(n.created).toLocaleString('es-AR')}</div><button class="btn danger" onclick="deleteNote('${n.id}')">Eliminar</button></article>`).join():'Tus notas guardadas aparecerán acá.';
+ $('remCount').textContent=reminders.filter(r=>!r.done).length;
+ const sorted=reminders.slice().sort((a,b)=>a.when.localeCompare(b.when));
+ $('reminders').className=sorted.length?'':'empty';
+ $('reminders').innerHTML=sorted.length?sorted.map(r=>`<article class="item"><h4>${r.done?'✅ ':''}${esc(r.title)}</h4><div class="meta">${new Date(r.when).toLocaleString('es-AR',{dateStyle:'medium',timeStyle:'short'})}</div><div class="row"><button class="btn" onclick="toggleReminder('${r.id}')">${r.done?'Marcar pendiente':'Marcar hecho'}</button><button class="btn danger" onclick="deleteReminder('${r.id}')">Eliminar</button></div></article>`).join():'Todavía no tenés recordatorios.';
+}
+window.deleteNote=id=>{notes=notes.filter(n=>n.id!==id);save()};
+window.deleteReminder=id=>{reminders=reminders.filter(r=>r.id!==id);save()};
+window.toggleReminder=id=>{reminders=reminders.map(r=>r.id===id?{...r,done:!r.done,notified:false}:r);save()};
+$('saveNote').onclick=()=>{const content=$('content').value.trim();if(!content){$('status').textContent='Primero dictá o escribí una nota.';return}notes.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),title:$('title').value.trim(),content,created:Date.now()});save();$('title').value='';$('content').value='';$('status').textContent='Nota guardada en este dispositivo.'};
+$('clearForm').onclick=()=>{$('title').value='';$('content').value='';};
+$('saveReminder').onclick=()=>{const title=$('remTitle').value.trim(),date=$('remDate').value,time=$('remTime').value;if(!title||!date||!time){$('notifyStatus').textContent='Completá el evento, la fecha y la hora.';return}const when=new Date(`${date}T${time}:00`);if(when.getTime()<=Date.now()){ $('notifyStatus').textContent='Elegí una fecha y hora futuras.';return}reminders.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),title,when:when.toISOString(),done:false,notified:false});save();$('remTitle').value='';$('notifyStatus').textContent='Recordatorio guardado. Para esta demo, mantené la página abierta para comprobar el aviso.'};
+$('enableNotify').onclick=async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='Este navegador no admite notificaciones web.';return}try{const p=await Notification.requestPermission();$('notifyStatus').textContent=p==='granted'?'Notificaciones permitidas. La demo solo comprueba recordatorios mientras esta página está abierta.': 'No se habilitaron las notificaciones.'}catch(e){$('notifyStatus').textContent='No se pudieron activar las notificaciones en este navegador.'}};
+function setupSpeech(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){$('mic').disabled=true;$('status').textContent='Este navegador no ofrece dictado por voz. Probá abrir la app en Google Chrome para Android.';return}
+ recognition=new SR();recognition.lang='es-AR';recognition.continuous=true;recognition.interimResults=true;
+ recognition.onstart=()=>{listening=true;$('mic').classList.add('listening');$('mic').textContent='⏹️';$('status').textContent='Te estoy escuchando… Tocá de nuevo para terminar.'};
+ recognition.onresult=e=>{let finalText='',interim='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript}const box=$('content');if(finalText)box.value=(box.value?box.value.trimEnd()+' ':'')+finalText.trim();$('status').textContent=interim?'Escuchando: '+interim:'Dictado agregado al texto.'};
+ recognition.onerror=e=>{$('status').textContent=e.error==='not-allowed'?'No hay permiso para usar el micrófono. Habilitalo en el navegador.':'No se pudo completar el dictado ('+e.error+').';};
+ recognition.onend=()=>{listening=false;$('mic').classList.remove('listening');$('mic').textContent='🎙️';if($('status').textContent.includes('escuchando'))$('status').textContent='Dictado detenido. Podés editar el texto y guardarlo.'};
+ $('mic').onclick=()=>{if(listening)recognition.stop();else{try{recognition.start()}catch(e){$('status').textContent='Esperá un momento y volvé a tocar el micrófono.'}}};
+}
+function checkReminders(){
+ const now=Date.now();let changed=false;
+ for(const r of reminders){if(!r.done&&!r.notified&&new Date(r.when).getTime()<=now){r.notified=true;changed=true;if('Notification'in window&&Notification.permission==='granted'){new Notification('ECO.AI — Recordatorio',{body:r.title})}else{alert('ECO.AI — Recordatorio: '+r.title)}}}
+ if(changed)save();
+}
+const today=new Date();$('remDate').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+setupSpeech();render();setInterval(checkReminders,15000);
+</script>
+</body>
+</html>
